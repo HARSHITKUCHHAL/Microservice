@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class QuestionService {
@@ -39,6 +40,34 @@ public class QuestionService {
 
     public ResponseEntity<String> addQuestion(Question question) {
         questionDao.save(question);
-        return new ResponseEntity<>("SUCCESS",HttpStatus.CREATED);
+        return new ResponseEntity<>("success",HttpStatus.CREATED);
+    }
+
+    public void deleteQuestionById(Integer id) {
+        if (!questionDao.existsById(id)){
+            return;
+        }
+        questionDao.deleteById(id);
+    }
+
+    public Question updateQuestionById(Integer id, Question updatedQuestion) {
+        Optional<Question> existingQuestionOpt = questionDao.findById(id);
+        if (existingQuestionOpt.isEmpty()){
+            throw new IllegalArgumentException("Question with ID " + id + " does not exist.");
+        }
+        Question existingQuestion = existingQuestionOpt.get();
+
+        // Update fields
+        existingQuestion.setQuestionTitle(updatedQuestion.getQuestionTitle());
+        existingQuestion.setOption1(updatedQuestion.getOption1());
+        existingQuestion.setOption2(updatedQuestion.getOption2());
+        existingQuestion.setOption3(updatedQuestion.getOption3());
+        existingQuestion.setOption4(updatedQuestion.getOption4());
+        existingQuestion.setRightAnswer(updatedQuestion.getRightAnswer());
+        existingQuestion.setDifficultylevel(updatedQuestion.getDifficultylevel());
+        existingQuestion.setCategory(updatedQuestion.getCategory());
+
+        // Save and return the updated question
+        return questionDao.save(existingQuestion);
     }
 }
